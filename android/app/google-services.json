@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "816945693857",
+    "project_id": "pedido-app-769f9",
+    "storage_bucket": "pedido-app-769f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816945693857:android:1ea5d3442f9867647adce0",
+        "android_client_info": {
+          "package_name": "com.guilherme.pedidos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH0eRbCIUelTKSCnc5td-S7e8BzxK0iHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
