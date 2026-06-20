@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pedido_app/views/add_pedido_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'viewmodels/auth_viewmodel.dart';
+import 'viewmodels/cliente_viewmodel.dart';
+import 'viewmodels/produto_viewmodel.dart';
+import 'viewmodels/pedido_viewmodel.dart';
+
 import 'views/login_screen.dart';
 import 'views/criar_conta_screen.dart';
+import 'views/home_screen.dart';
+import 'views/add_cliente_screen.dart';
+import 'views/add_produto_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +37,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => ClienteViewModel()),
+        ChangeNotifierProvider(create: (_) => ProdutoViewModel()),
+        ChangeNotifierProvider(create: (_) => PedidoViewModel()),
       ],
       child: MaterialApp(
         title: 'Pedido App',
@@ -37,15 +48,10 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (_) => const LoginScreen(),
           '/criar-conta': (_) => const CriarContaScreen(),
-          '/home': (_) => const Scaffold(
-            backgroundColor: Color(0xFF0F0F1A),
-            body: Center(
-              child: Text(
-                'Home em breve!',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
+          '/home': (_) => const HomeScreen(),
+          '/adicionar-cliente': (_) => const AdicionarClienteScreen(),
+          '/novo-pedido': (_) => const AdicionarPedidoScreen(),
+          '/adicionar-produto': (_) => const AdicionarProdutoScreen(),
         },
       ),
     );
