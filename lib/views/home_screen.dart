@@ -15,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _saldoVisivel = false;
+
   @override
   void initState() {
     super.initState();
@@ -98,15 +100,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total em Vendas',
-                        style: TextStyle(color: Colors.white70, fontSize: 14)),
+                    // Label + olhinho
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Total em Vendas',
+                            style: TextStyle(
+                                color: Colors.white70, fontSize: 14)),
+                        GestureDetector(
+                          onTap: () =>
+                              setState(() => _saldoVisivel = !_saldoVisivel),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _saldoVisivel
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
-                    Text(
-                      'R\$ ${totalVendas.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold),
+                    // Valor ou pontos
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: _saldoVisivel
+                          ? Text(
+                        'R\$ ${totalVendas.toStringAsFixed(2)}',
+                        key: const ValueKey('visivel'),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold),
+                      )
+                          : const Text(
+                        'R\$ ••••••',
+                        key: ValueKey('oculto'),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(children: [
@@ -168,19 +210,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Novo Pedido',
                     icone: Icons.add_shopping_cart,
                     cor: const Color(0xFF6C63FF),
-                      onTap: () => Navigator.pushNamed(context, '/novo-pedido'),
+                    onTap: () => Navigator.pushNamed(context, '/novo-pedido'),
                   ),
                   _CardAtalho(
                     label: 'Novo Cliente',
                     icone: Icons.people_outline,
                     cor: const Color(0xFF10B981),
-                      onTap: () => Navigator.pushNamed(context, '/adicionar-cliente'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/adicionar-cliente'),
                   ),
                   _CardAtalho(
                     label: 'Novo Produto',
                     icone: Icons.add_box_outlined,
                     cor: const Color(0xFF3B82F6),
-                    onTap: () => Navigator.pushNamed(context, '/adicionar-produto'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/adicionar-produto'),
                   ),
                   _CardAtalho(
                     label: 'Pedidos',
@@ -275,7 +319,9 @@ class _CardAtalho extends StatelessWidget {
             const SizedBox(height: 8),
             Text(label,
                 style: TextStyle(
-                    color: cor, fontWeight: FontWeight.w600, fontSize: 14)),
+                    color: cor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
           ],
         ),
       ),
