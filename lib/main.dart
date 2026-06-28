@@ -16,6 +16,8 @@ import 'views/add_produto_screen.dart';
 import 'views/add_pedido_screen.dart';
 import 'views/editar_pedido_screen.dart';
 import 'views/detalhes_pedido_screen.dart';
+import 'views/editar_cliente_screen.dart';
+import 'views/detalhes_cliente_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +59,8 @@ class MyApp extends StatelessWidget {
           '/novo-pedido':       (_) => const AdicionarPedidoScreen(),
           '/detalhes-pedido': (_) => const DetalhesPedidoScreen(),
           '/editar-pedido':   (_) => const EditarPedidoScreen(),
+          '/detalhes-cliente': (_) => const DetalhesClienteScreen(),
+          '/editar-cliente':   (_) => const EditarClienteScreen(),
         },
       ),
     );

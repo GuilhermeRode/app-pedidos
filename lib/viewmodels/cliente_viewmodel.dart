@@ -40,4 +40,16 @@ class ClienteViewModel extends ChangeNotifier {
     await _repository.remover(id);
     await carregarClientes();
   }
+
+  Future<bool> atualizarCliente(Cliente cliente) async {
+    try {
+      await _repository.atualizar(cliente);
+      await carregarClientes();
+      return true;
+    } catch (e) {
+      erro = 'Erro ao atualizar cliente.';
+      notifyListeners();
+      return false;
+    }
+  }
 }

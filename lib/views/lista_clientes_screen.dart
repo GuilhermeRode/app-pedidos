@@ -15,12 +15,6 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
   String _busca = '';
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => context.read<ClienteViewModel>().carregarClientes());
-  }
-
-  @override
   void dispose() {
     _buscaController.dispose();
     super.dispose();
@@ -39,16 +33,14 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E1E2E),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: const Text('Clientes',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
-          // Barra de busca
+          // ── Busca ────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -57,7 +49,8 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
               onChanged: (v) => setState(() => _busca = v),
               decoration: InputDecoration(
                 hintText: 'Buscar cliente por nome...',
-                hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                hintStyle:
+                const TextStyle(color: Color(0xFF9CA3AF)),
                 prefixIcon:
                 const Icon(Icons.search, color: Color(0xFF6C63FF)),
                 suffixIcon: _busca.isNotEmpty
@@ -78,28 +71,27 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF6C63FF)),
+                  borderSide:
+                  const BorderSide(color: Color(0xFF6C63FF)),
                 ),
               ),
             ),
           ),
 
-          // Contador
+          // ── Contador ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Text(
-                  '${clientesFiltrados.length} cliente(s)',
-                  style: const TextStyle(
-                      color: Color(0xFF9CA3AF), fontSize: 13),
-                ),
+                Text('${clientesFiltrados.length} cliente(s)',
+                    style: const TextStyle(
+                        color: Color(0xFF9CA3AF), fontSize: 13)),
               ],
             ),
           ),
           const SizedBox(height: 8),
 
-          // Lista
+          // ── Lista ────────────────────────────────────────────────────
           Expanded(
             child: vm.carregando
                 ? const Center(
@@ -110,7 +102,6 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
               mensagem: _busca.isNotEmpty
                   ? 'Nenhum cliente encontrado para "$_busca"'
                   : 'Nenhum cliente cadastrado ainda.',
-              icone: Icons.people_outline,
             )
                 : ListView.separated(
               padding: const EdgeInsets.symmetric(
@@ -120,10 +111,15 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
               const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final c = clientesFiltrados[i];
-                return _ClienteTile(
+                return _ClienteCard(
                   cliente: c,
-                  onDelete: () =>
-                      _confirmarRemocao(context, vm, c),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalhes-cliente',
+                    arguments: c,
+                  ).then((_) => context
+                      .read<ClienteViewModel>()
+                      .carregarClientes()),
                 );
               },
             ),
@@ -132,86 +128,58 @@ class _ListaClientesScreenState extends State<ListaClientesScreen> {
       ),
     );
   }
-
-  void _confirmarRemocao(
-      BuildContext context, ClienteViewModel vm, Cliente c) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E2E),
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Remover cliente',
-            style: TextStyle(color: Colors.white)),
-        content: Text('Deseja remover "${c.nome}"?',
-            style: const TextStyle(color: Color(0xFF9CA3AF))),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF9CA3AF))),
-          ),
-          TextButton(
-            onPressed: () {
-              vm.removerCliente(c.id);
-              Navigator.pop(context);
-            },
-            child: const Text('Remover',
-                style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _ClienteTile extends StatelessWidget {
-  final Cliente cliente;
-  final VoidCallback onDelete;
+// ── Card clicável — sem lixeira ───────────────────────────────────────────────
 
-  const _ClienteTile({required this.cliente, required this.onDelete});
+class _ClienteCard extends StatelessWidget {
+  final Cliente cliente;
+  final VoidCallback onTap;
+
+  const _ClienteCard({required this.cliente, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2E),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          // Avatar com inicial
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF6C63FF).withOpacity(0.15),
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: const Color(0xFF6C63FF).withOpacity(0.4)),
-            ),
-            child: Center(
-              child: Text(
-                cliente.nome.isNotEmpty
-                    ? cliente.nome[0].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                    color: Color(0xFF6C63FF),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E2E),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            // Avatar com inicial
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF6C63FF).withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: const Color(0xFF6C63FF).withOpacity(0.4)),
+              ),
+              child: Center(
+                child: Text(
+                  cliente.nome.isNotEmpty
+                      ? cliente.nome[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                      color: Color(0xFF6C63FF),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          // Dados
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
+            // Dados
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
                     Expanded(
                       child: Text(cliente.nome,
                           style: const TextStyle(
@@ -239,44 +207,43 @@ class _ClienteTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ],
-                ),
-                if (cliente.celular.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(children: [
-                    const Icon(Icons.phone_outlined,
-                        color: Color(0xFF9CA3AF), size: 13),
-                    const SizedBox(width: 4),
-                    Text(cliente.celular,
-                        style: const TextStyle(
-                            color: Color(0xFF9CA3AF), fontSize: 13)),
                   ]),
-                ],
-                if (cliente.email.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Row(children: [
-                    const Icon(Icons.email_outlined,
-                        color: Color(0xFF9CA3AF), size: 13),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(cliente.email,
-                          overflow: TextOverflow.ellipsis,
+                  if (cliente.celular.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(children: [
+                      const Icon(Icons.phone_outlined,
+                          color: Color(0xFF9CA3AF), size: 13),
+                      const SizedBox(width: 4),
+                      Text(cliente.celular,
                           style: const TextStyle(
-                              color: Color(0xFF9CA3AF), fontSize: 13)),
-                    ),
-                  ]),
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 13)),
+                    ]),
+                  ],
+                  if (cliente.email.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(children: [
+                      const Icon(Icons.email_outlined,
+                          color: Color(0xFF9CA3AF), size: 13),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(cliente.email,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 13)),
+                      ),
+                    ]),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
 
-          // Botão remover
-          IconButton(
-            icon: const Icon(Icons.delete_outline,
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right,
                 color: Color(0xFF9CA3AF), size: 20),
-            onPressed: onDelete,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -284,8 +251,7 @@ class _ClienteTile extends StatelessWidget {
 
 class _Vazio extends StatelessWidget {
   final String mensagem;
-  final IconData icone;
-  const _Vazio({required this.mensagem, required this.icone});
+  const _Vazio({required this.mensagem});
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +259,8 @@ class _Vazio extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icone, color: const Color(0xFF3A3A4E), size: 64),
+          const Icon(Icons.people_outline,
+              color: Color(0xFF3A3A4E), size: 64),
           const SizedBox(height: 16),
           Text(mensagem,
               textAlign: TextAlign.center,

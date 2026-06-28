@@ -31,4 +31,20 @@ class Cliente {
       'ativo': ativo,
     };
   }
+
+  Cliente copyWith({
+    String? id,
+    String? nome,
+    String? celular,
+    String? email,
+    bool? ativo,
+  }) {
+    return Cliente(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      celular: celular ?? this.celular,
+      email: email ?? this.email,
+      ativo: ativo ?? this.ativo,
+    );
+  }
 }
