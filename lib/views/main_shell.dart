@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:pedido_app/views/home_screen.dart';
+//import 'package:pedido_app/views/lista_clientes_screen.dart';
 import 'package:pedido_app/views/lista_pedidos_screen.dart';
+// import 'package:pedido_app/views/lista_produtos_screen.dart';
+
 import 'package:provider/provider.dart';
 
 import '../viewmodels/cliente_viewmodel.dart';
-import '../viewmodels/produto_viewmodel.dart';
 import '../viewmodels/pedido_viewmodel.dart';
-
-import 'home_screen.dart';
+import '../viewmodels/produto_viewmodel.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -18,17 +20,17 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  // As quatro abas — sem o FAB central, que é ação separada
   final List<Widget> _telas = const [
     HomeScreen(),
-      ListaPedidosScreen(),
-    //ListaClientesScreen(),
-    //ListaProdutosScreen(),
+    ListaPedidosScreen(),
+    // ListaClientesScreen(),
+    // ListaProdutosScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
+
     Future.microtask(() {
       context.read<PedidoViewModel>().carregarPedidos();
       context.read<ClienteViewModel>().carregarClientes();
@@ -36,24 +38,103 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  //=========================================================
+  // FAB muda conforme a tela atual
+  //=========================================================
+
+  void _fabAction() {
+    switch (_currentIndex) {
+    // HOME
+      case 0:
+        Navigator.pushNamed(context, '/novo-pedido').then((_) {
+          context.read<PedidoViewModel>().carregarPedidos();
+        });
+        break;
+
+    // PEDIDOS
+      case 1:
+        Navigator.pushNamed(context, '/novo-pedido').then((_) {
+          context.read<PedidoViewModel>().carregarPedidos();
+        });
+        break;
+
+    // CLIENTES
+      case 2:
+        Navigator.pushNamed(context, '/adicionar-cliente').then((_) {
+          context.read<ClienteViewModel>().carregarClientes();
+        });
+        break;
+
+    // PRODUTOS
+      case 3:
+        Navigator.pushNamed(context, '/adicionar-produto').then((_) {
+          context.read<ProdutoViewModel>().carregarProdutos();
+        });
+        break;
+    }
+  }
+
+  IconData _fabIcon() {
+    switch (_currentIndex) {
+      case 0:
+      case 1:
+        return Icons.receipt_long_rounded;
+
+      case 2:
+        return Icons.person_add_alt_1_rounded;
+
+      case 3:
+        return Icons.inventory_2_rounded;
+
+      default:
+        return Icons.add;
+    }
+  }
+
+  String _fabTooltip() {
+    switch (_currentIndex) {
+      case 0:
+      case 1:
+        return 'Novo Pedido';
+
+      case 2:
+        return 'Novo Cliente';
+
+      case 3:
+        return 'Novo Produto';
+
+      default:
+        return 'Adicionar';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F1A),
+
       body: IndexedStack(
         index: _currentIndex,
         children: _telas,
       ),
 
-      // FAB central — abre diretamente "Novo Pedido"
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/novo-pedido')
-            .then((_) => context.read<PedidoViewModel>().carregarPedidos()),
+        tooltip: _fabTooltip(),
+        onPressed: _fabAction,
         backgroundColor: const Color(0xFF6C63FF),
         elevation: 4,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: Icon(
+            _fabIcon(),
+            key: ValueKey(_currentIndex),
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       bottomNavigationBar: _BottomNav(
@@ -68,7 +149,10 @@ class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _BottomNav({required this.currentIndex, required this.onTap});
+  const _BottomNav({
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +164,6 @@ class _BottomNav extends StatelessWidget {
         height: 64,
         child: Row(
           children: [
-            // Lado esquerdo: Home e Pedidos
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -103,10 +186,8 @@ class _BottomNav extends StatelessWidget {
               ),
             ),
 
-            // Espaço reservado para o FAB
             const SizedBox(width: 72),
 
-            // Lado direito: Clientes e Produtos
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
