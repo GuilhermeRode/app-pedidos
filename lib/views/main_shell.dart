@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pedido_app/views/home_screen.dart';
-//import 'package:pedido_app/views/lista_clientes_screen.dart';
+import 'package:pedido_app/views/lista_clientes_screen.dart';
 import 'package:pedido_app/views/lista_pedidos_screen.dart';
 // import 'package:pedido_app/views/lista_produtos_screen.dart';
 
@@ -23,7 +23,7 @@ class _MainShellState extends State<MainShell> {
   final List<Widget> _telas = const [
     HomeScreen(),
     ListaPedidosScreen(),
-    // ListaClientesScreen(),
+    ListaClientesScreen(),
     // ListaProdutosScreen(),
   ];
 
