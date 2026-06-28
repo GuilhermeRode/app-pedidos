@@ -21,4 +21,8 @@ class PedidoRepository {
   Future<void> atualizarStatus(String id, String novoStatus) async {
     await _db.collection(_colecao).doc(id).update({'status': novoStatus});
   }
+
+  Future<void> atualizar(Pedido pedido) async {
+    await _db.collection(_colecao).doc(pedido.id).update(pedido.toMap());
+  }
 }

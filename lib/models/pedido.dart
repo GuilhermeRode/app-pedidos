@@ -74,4 +74,24 @@ class Pedido {
         'data': Timestamp.fromDate(data),
         'desconto': desconto,
       };
+
+  Pedido copyWith({
+    String? id,
+    String? clienteId,
+    String? nomeCliente,
+    List<ItemPedido>? itens,
+    String? status,
+    DateTime? data,
+    double? desconto,
+  }) {
+    return Pedido(
+      id: id ?? this.id,
+      clienteId: clienteId ?? this.clienteId,
+      nomeCliente: nomeCliente ?? this.nomeCliente,
+      itens: itens ?? this.itens,
+      status: status ?? this.status,
+      data: data ?? this.data,
+      desconto: desconto ?? this.desconto,
+    );
+  }
 }

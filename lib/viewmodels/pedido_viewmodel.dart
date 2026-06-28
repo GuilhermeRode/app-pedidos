@@ -45,4 +45,16 @@ class PedidoViewModel extends ChangeNotifier {
     await _repository.atualizarStatus(id, novoStatus);
     await carregarPedidos();
   }
+
+  Future<bool> atualizarPedido(Pedido pedido) async {
+    try {
+      await _repository.atualizar(pedido);
+      await carregarPedidos();
+      return true;
+    } catch (e) {
+      erro = 'Erro ao atualizar pedido.';
+      notifyListeners();
+      return false;
+    }
+  }
 }
