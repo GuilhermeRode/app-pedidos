@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pedido_app/views/home_screen.dart';
 import 'package:pedido_app/views/lista_clientes_screen.dart';
 import 'package:pedido_app/views/lista_pedidos_screen.dart';
-// import 'package:pedido_app/views/lista_produtos_screen.dart';
+import 'package:pedido_app/views/lista_produtos_screen.dart';
 
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class _MainShellState extends State<MainShell> {
     HomeScreen(),
     ListaPedidosScreen(),
     ListaClientesScreen(),
-    // ListaProdutosScreen(),
+    ListaProdutosScreen(),
   ];
 
   @override
