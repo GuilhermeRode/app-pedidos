@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:pedido_app/views/add_pedido_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -11,9 +10,10 @@ import 'viewmodels/pedido_viewmodel.dart';
 
 import 'views/login_screen.dart';
 import 'views/criar_conta_screen.dart';
-import 'views/home_screen.dart';
+import 'views/main_shell.dart';
 import 'views/add_cliente_screen.dart';
 import 'views/add_produto_screen.dart';
+import 'views/add_pedido_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,14 +44,15 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Pedido App',
         debugShowCheckedModeBanner: false,
-        initialRoute: FirebaseAuth.instance.currentUser != null ? '/home' : '/login',
+        initialRoute:
+        FirebaseAuth.instance.currentUser != null ? '/shell' : '/login',
         routes: {
-          '/login': (_) => const LoginScreen(),
-          '/criar-conta': (_) => const CriarContaScreen(),
-          '/home': (_) => const HomeScreen(),
+          '/login':             (_) => const LoginScreen(),
+          '/criar-conta':       (_) => const CriarContaScreen(),
+          '/shell':             (_) => const MainShell(),
           '/adicionar-cliente': (_) => const AdicionarClienteScreen(),
-          '/novo-pedido': (_) => const AdicionarPedidoScreen(),
           '/adicionar-produto': (_) => const AdicionarProdutoScreen(),
+          '/novo-pedido':       (_) => const AdicionarPedidoScreen(),
         },
       ),
     );

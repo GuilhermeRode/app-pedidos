@@ -18,18 +18,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _saldoVisivel = false;
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      context.read<PedidoViewModel>().carregarPedidos();
-      context.read<ClienteViewModel>().carregarClientes();
-      context.read<ProdutoViewModel>().carregarProdutos();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final pedidoVm = context.watch<PedidoViewModel>();
+    final pedidoVm  = context.watch<PedidoViewModel>();
     final clienteVm = context.watch<ClienteViewModel>();
     final produtoVm = context.watch<ProdutoViewModel>();
 
@@ -48,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Cabeçalho
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -85,7 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 32),
+
+              // Card de vendas com olhinho
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -100,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Label + olhinho
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -108,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                                 color: Colors.white70, fontSize: 14)),
                         GestureDetector(
-                          onTap: () =>
-                              setState(() => _saldoVisivel = !_saldoVisivel),
+                          onTap: () => setState(
+                                  () => _saldoVisivel = !_saldoVisivel),
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
@@ -128,7 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Valor ou pontos
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 250),
                       child: _saldoVisivel
@@ -157,12 +149,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 6),
                       Text(
                           '${pedidoVm.pedidos.where((p) => p.status == "concluido").length} pedidos concluídos',
-                          style: const TextStyle(color: Colors.white70)),
+                          style:
+                          const TextStyle(color: Colors.white70)),
                     ]),
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              // Cards de resumo
               Row(children: [
                 Expanded(
                   child: _CardResumo(
@@ -191,13 +187,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ]),
+
               const SizedBox(height: 32),
+
+              // Ações rápidas
               const Text('Ações rápidas',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
+
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
@@ -210,7 +210,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Novo Pedido',
                     icone: Icons.add_shopping_cart,
                     cor: const Color(0xFF6C63FF),
-                    onTap: () => Navigator.pushNamed(context, '/novo-pedido'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/novo-pedido'),
                   ),
                   _CardAtalho(
                     label: 'Novo Cliente',
@@ -234,6 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
             ],
           ),
@@ -281,7 +283,8 @@ class _CardResumo extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.bold)),
           Text(label,
-              style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
+              style: const TextStyle(
+                  color: Color(0xFF9CA3AF), fontSize: 12)),
         ],
       ),
     );
