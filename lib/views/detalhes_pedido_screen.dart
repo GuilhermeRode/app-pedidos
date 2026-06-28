@@ -88,6 +88,53 @@ class DetalhesPedidoScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
+            // ── Alterar Status ──────────────────────────────────────────────
+            _Secao(titulo: 'Alterar Status', children: [
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: ['pendente', 'orcamento', 'concluido', 'cancelado']
+                    .map((s) {
+                  final cor = _corStatus(s);
+                  final ativo = s == pedido.status;
+                  return GestureDetector(
+                    onTap: ativo
+                        ? null
+                        : () {
+                      context
+                          .read<PedidoViewModel>()
+                          .atualizarStatus(pedido.id, s);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: ativo
+                            ? cor.withOpacity(0.2)
+                            : const Color(0xFF2A2A3E),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: ativo ? cor : const Color(0xFF3A3A4E),
+                        ),
+                      ),
+                      child: Text(
+                        _labelStatus(s),
+                        style: TextStyle(
+                          color: ativo ? cor : const Color(0xFF9CA3AF),
+                          fontSize: 12,
+                          fontWeight:
+                          ativo ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ]),
+
+            const SizedBox(height: 24),
+
             // ── Seção: Cliente e data ───────────────────────────────────
             _Secao(titulo: 'Informações', children: [
               _LinhaDetalhe(
