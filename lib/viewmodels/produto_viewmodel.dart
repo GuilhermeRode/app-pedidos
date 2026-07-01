@@ -40,4 +40,16 @@ class ProdutoViewModel extends ChangeNotifier {
     await _repository.remover(id);
     await carregarProdutos();
   }
+
+  Future<bool> atualizarProduto(Produto produto) async {
+    try {
+      await _repository.atualizar(produto);
+      await carregarProdutos();
+      return true;
+    } catch (e) {
+      erro = 'Erro ao atualizar produto.';
+      notifyListeners();
+      return false;
+    }
+  }
 }

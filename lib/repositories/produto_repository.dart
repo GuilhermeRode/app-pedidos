@@ -17,4 +17,8 @@ class ProdutoRepository {
   Future<void> remover(String id) async {
     await _db.collection(_colecao).doc(id).delete();
   }
+
+  Future<void> atualizar(Produto produto) async {
+    await _db.collection(_colecao).doc(produto.id).update(produto.toMap());
+  }
 }

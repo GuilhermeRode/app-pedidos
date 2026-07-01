@@ -31,4 +31,20 @@ class Produto {
       'disponivel': disponivel,
     };
   }
+
+  Produto copyWith({
+    String? id,
+    String? nome,
+    double? precoVenda,
+    double? precoCusto,
+    bool? disponivel,
+  }) {
+    return Produto(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      precoVenda: precoVenda ?? this.precoVenda,
+      precoCusto: precoCusto ?? this.precoCusto,
+      disponivel: disponivel ?? this.disponivel,
+    );
+  }
 }
