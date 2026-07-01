@@ -18,8 +18,6 @@ import 'views/editar_pedido_screen.dart';
 import 'views/detalhes_pedido_screen.dart';
 import 'views/editar_cliente_screen.dart';
 import 'views/detalhes_cliente_screen.dart';
-import 'views/editar_cliente_screen.dart';
-import 'views/detalhes_cliente_screen.dart';
 import 'views/editar_produto_screen.dart';
 import 'views/detalhes_produto_screen.dart';
 

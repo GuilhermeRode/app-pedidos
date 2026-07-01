@@ -13,14 +13,7 @@ class ListaProdutosScreen extends StatefulWidget {
 class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
   final _buscaController = TextEditingController();
   String _busca = '';
-  // null = todos, true = disponível, false = indisponível
   bool? _filtroDisponivel;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => context.read<ProdutoViewModel>().carregarProdutos());
-  }
 
   @override
   void dispose() {
@@ -45,17 +38,14 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E1E2E),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: const Text('Produtos',
             style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
-          // Busca
+          // ── Busca ────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
@@ -64,7 +54,8 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
               onChanged: (v) => setState(() => _busca = v),
               decoration: InputDecoration(
                 hintText: 'Buscar produto...',
-                hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                hintStyle:
+                const TextStyle(color: Color(0xFF9CA3AF)),
                 prefixIcon:
                 const Icon(Icons.search, color: Color(0xFF6C63FF)),
                 suffixIcon: _busca.isNotEmpty
@@ -92,7 +83,7 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
             ),
           ),
 
-          // Filtros de disponibilidade
+          // ── Filtros ──────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -100,28 +91,31 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
                 _FiltroChip(
                   label: 'Todos',
                   selecionado: _filtroDisponivel == null,
-                  onTap: () => setState(() => _filtroDisponivel = null),
+                  onTap: () =>
+                      setState(() => _filtroDisponivel = null),
                 ),
                 const SizedBox(width: 8),
                 _FiltroChip(
                   label: 'Disponíveis',
                   selecionado: _filtroDisponivel == true,
                   cor: const Color(0xFF10B981),
-                  onTap: () => setState(() => _filtroDisponivel = true),
+                  onTap: () =>
+                      setState(() => _filtroDisponivel = true),
                 ),
                 const SizedBox(width: 8),
                 _FiltroChip(
                   label: 'Indisponíveis',
                   selecionado: _filtroDisponivel == false,
                   cor: Colors.red,
-                  onTap: () => setState(() => _filtroDisponivel = false),
+                  onTap: () =>
+                      setState(() => _filtroDisponivel = false),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 8),
 
-          // Contador
+          // ── Contador ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -134,7 +128,7 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Lista
+          // ── Lista ────────────────────────────────────────────────────
           Expanded(
             child: vm.carregando
                 ? const Center(
@@ -145,7 +139,6 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
               mensagem: _busca.isNotEmpty
                   ? 'Nenhum produto encontrado para "$_busca"'
                   : 'Nenhum produto cadastrado ainda.',
-              icone: Icons.inventory_2_outlined,
             )
                 : ListView.separated(
               padding: const EdgeInsets.symmetric(
@@ -155,10 +148,15 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
               const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final p = produtosFiltrados[i];
-                return _ProdutoTile(
+                return _ProdutoCard(
                   produto: p,
-                  onDelete: () =>
-                      _confirmarRemocao(context, vm, p),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalhes-produto',
+                    arguments: p,
+                  ).then((_) => context
+                      .read<ProdutoViewModel>()
+                      .carregarProdutos()),
                 );
               },
             ),
@@ -167,44 +165,15 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
       ),
     );
   }
-
-  void _confirmarRemocao(
-      BuildContext context, ProdutoViewModel vm, Produto p) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E2E),
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Remover produto',
-            style: TextStyle(color: Colors.white)),
-        content: Text('Deseja remover "${p.nome}"?',
-            style: const TextStyle(color: Color(0xFF9CA3AF))),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF9CA3AF))),
-          ),
-          TextButton(
-            onPressed: () {
-              vm.removerProduto(p.id);
-              Navigator.pop(context);
-            },
-            child:
-            const Text('Remover', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _ProdutoTile extends StatelessWidget {
-  final Produto produto;
-  final VoidCallback onDelete;
+// ── Card clicável ─────────────────────────────────────────────────────────────
 
-  const _ProdutoTile({required this.produto, required this.onDelete});
+class _ProdutoCard extends StatelessWidget {
+  final Produto produto;
+  final VoidCallback onTap;
+
+  const _ProdutoCard({required this.produto, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -215,98 +184,103 @@ class _ProdutoTile extends StatelessWidget {
         .toStringAsFixed(1)
         : null;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2E),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          // Ícone
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF3B82F6).withOpacity(0.15),
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: const Color(0xFF3B82F6).withOpacity(0.4)),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E2E),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            // Ícone
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: const Color(0xFF3B82F6).withOpacity(0.4)),
+              ),
+              child: const Icon(Icons.inventory_2_outlined,
+                  color: Color(0xFF3B82F6), size: 20),
             ),
-            child: const Icon(Icons.inventory_2_outlined,
-                color: Color(0xFF3B82F6), size: 20),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          // Dados
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  Expanded(
-                    child: Text(produto.nome,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: produto.disponivel
-                          ? const Color(0xFF10B981).withOpacity(0.15)
-                          : Colors.red.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
+            // Dados
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    Expanded(
+                      child: Text(produto.nome,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15)),
                     ),
-                    child: Text(
-                      produto.disponivel ? 'Disponível' : 'Indisponível',
-                      style: TextStyle(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
                         color: produto.disponivel
-                            ? const Color(0xFF10B981)
-                            : Colors.red,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                            ? const Color(0xFF10B981).withOpacity(0.15)
+                            : Colors.red.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        produto.disponivel
+                            ? 'Disponível'
+                            : 'Indisponível',
+                        style: TextStyle(
+                          color: produto.disponivel
+                              ? const Color(0xFF10B981)
+                              : Colors.red,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ]),
-                const SizedBox(height: 6),
-                Row(children: [
-                  _InfoPreco(
-                      label: 'Venda',
-                      valor:
-                      'R\$ ${produto.precoVenda.toStringAsFixed(2)}',
-                      cor: const Color(0xFF10B981)),
-                  const SizedBox(width: 16),
-                  _InfoPreco(
-                      label: 'Custo',
-                      valor:
-                      'R\$ ${produto.precoCusto.toStringAsFixed(2)}',
-                      cor: const Color(0xFF9CA3AF)),
-                  if (margem != null) ...[
+                  ]),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    _InfoPreco(
+                        label: 'Venda',
+                        valor:
+                        'R\$ ${produto.precoVenda.toStringAsFixed(2)}',
+                        cor: const Color(0xFF10B981)),
                     const SizedBox(width: 16),
                     _InfoPreco(
-                        label: 'Margem',
-                        valor: '$margem%',
-                        cor: const Color(0xFFF59E0B)),
-                  ],
-                ]),
-              ],
+                        label: 'Custo',
+                        valor:
+                        'R\$ ${produto.precoCusto.toStringAsFixed(2)}',
+                        cor: const Color(0xFF9CA3AF)),
+                    if (margem != null) ...[
+                      const SizedBox(width: 16),
+                      _InfoPreco(
+                          label: 'Margem',
+                          valor: '$margem%',
+                          cor: const Color(0xFFF59E0B)),
+                    ],
+                  ]),
+                ],
+              ),
             ),
-          ),
 
-          IconButton(
-            icon: const Icon(Icons.delete_outline,
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right,
                 color: Color(0xFF9CA3AF), size: 20),
-            onPressed: onDelete,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+// ── Widgets auxiliares ────────────────────────────────────────────────────────
 
 class _InfoPreco extends StatelessWidget {
   final String label, valor;
@@ -324,7 +298,9 @@ class _InfoPreco extends StatelessWidget {
                 color: Color(0xFF9CA3AF), fontSize: 10)),
         Text(valor,
             style: TextStyle(
-                color: cor, fontSize: 13, fontWeight: FontWeight.w600)),
+                color: cor,
+                fontSize: 13,
+                fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -351,11 +327,12 @@ class _FiltroChip extends StatelessWidget {
         padding:
         const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: selecionado ? cor.withOpacity(0.15) : const Color(0xFF1E1E2E),
+          color: selecionado
+              ? cor.withOpacity(0.15)
+              : const Color(0xFF1E1E2E),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selecionado ? cor : const Color(0xFF3A3A4E),
-          ),
+              color: selecionado ? cor : const Color(0xFF3A3A4E)),
         ),
         child: Text(label,
             style: TextStyle(
@@ -371,8 +348,7 @@ class _FiltroChip extends StatelessWidget {
 
 class _Vazio extends StatelessWidget {
   final String mensagem;
-  final IconData icone;
-  const _Vazio({required this.mensagem, required this.icone});
+  const _Vazio({required this.mensagem});
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +356,8 @@ class _Vazio extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icone, color: const Color(0xFF3A3A4E), size: 64),
+          const Icon(Icons.inventory_2_outlined,
+              color: Color(0xFF3A3A4E), size: 64),
           const SizedBox(height: 16),
           Text(mensagem,
               textAlign: TextAlign.center,
