@@ -1,13 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../models/pedido.dart';
-import '../models/cliente.dart';
 import '../models/produto.dart';
-import '../viewmodels/pedido_viewmodel.dart';
 import '../viewmodels/produto_viewmodel.dart';
-import '../viewmodels/cliente_viewmodel.dart';
 
 class AdicionarProdutoScreen extends StatefulWidget {
   const AdicionarProdutoScreen({super.key});
@@ -25,74 +19,15 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
   final _precoVendaController = TextEditingController();
   final _precoCustoController = TextEditingController();
   final _estoqueController    = TextEditingController();
+  final _imagemUrlController  = TextEditingController();
 
   bool _disponivel = true;
   String _tipoSelecionado = 'Produto'; // Produto, Combo, Serviço
-  File? _imagemSelecionada;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-  }
-
-  Future<void> _selecionarImagem() async {
-    final picker = ImagePicker();
-    final arquivo = await showModalBottomSheet<XFile?>(
-      context: context,
-      backgroundColor: const Color(0xFF1E1E2E),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined,
-                  color: Color(0xFF6C63FF)),
-              title: const Text('Tirar foto',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () async {
-                final foto = await picker.pickImage(
-                  source: ImageSource.camera,
-                  imageQuality: 80,
-                  maxWidth: 1280,
-                );
-                if (ctx.mounted) Navigator.pop(ctx, foto);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined,
-                  color: Color(0xFF6C63FF)),
-              title: const Text('Escolher da galeria',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () async {
-                final foto = await picker.pickImage(
-                  source: ImageSource.gallery,
-                  imageQuality: 80,
-                  maxWidth: 1280,
-                );
-                if (ctx.mounted) Navigator.pop(ctx, foto);
-              },
-            ),
-            if (_imagemSelecionada != null)
-              ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Remover foto',
-                    style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  setState(() => _imagemSelecionada = null);
-                  Navigator.pop(ctx);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-
-    if (arquivo != null) {
-      setState(() => _imagemSelecionada = File(arquivo.path));
-    }
   }
 
   @override
@@ -102,6 +37,7 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
     _precoVendaController.dispose();
     _precoCustoController.dispose();
     _estoqueController.dispose();
+    _imagemUrlController.dispose();
     super.dispose();
   }
 
@@ -110,22 +46,22 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
     final vm = context.watch<ProdutoViewModel>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFFF5F8FC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E2E),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF15181F)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Adicionar Produto',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+                color: Color(0xFF15181F), fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF6C63FF),
-          labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFF9CA3AF),
+          indicatorColor: const Color(0xFF3CA4EB),
+          labelColor: const Color(0xFF3CA4EB),
+          unselectedLabelColor: const Color(0xFF64748B),
           tabs: const [
             Tab(text: 'Item'),
             Tab(text: 'Estoque'),
@@ -140,10 +76,9 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
             nomeController: _nomeController,
             precoVendaController: _precoVendaController,
             precoCustoController: _precoCustoController,
+            imagemUrlController: _imagemUrlController,
             disponivel: _disponivel,
             tipoSelecionado: _tipoSelecionado,
-            imagemSelecionada: _imagemSelecionada,
-            onSelecionarImagem: _selecionarImagem,
             onDisponivel: (v) => setState(() => _disponivel = v),
             onTipo: (t) => setState(() => _tipoSelecionado = t),
           ),
@@ -157,22 +92,20 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
         child: SizedBox(
           height: 52,
           child: ElevatedButton.icon(
-            onPressed: (vm.carregando || vm.enviandoImagem) ? null : _salvar,
+            onPressed: vm.carregando ? null : _salvar,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C63FF),
+              backgroundColor: const Color(0xFF3CA4EB),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            icon: (vm.carregando || vm.enviandoImagem)
+            icon: vm.carregando
                 ? const SizedBox(
                 width: 20, height: 20,
                 child: CircularProgressIndicator(
                     color: Colors.white, strokeWidth: 2))
                 : const Icon(Icons.check, color: Colors.white),
             label: Text(
-              vm.enviandoImagem
-                  ? 'Enviando foto...'
-                  : (vm.carregando ? 'Salvando...' : 'Salvar'),
+              vm.carregando ? 'Salvando...' : 'Salvar',
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
@@ -194,18 +127,18 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
     final precoCusto = double.tryParse(
         _precoCustoController.text.replaceAll(',', '.')) ?? 0;
 
+    final urlDigitada = _imagemUrlController.text.trim();
+
     final produto = Produto(
       id: '',
       nome: _nomeController.text.trim(),
       precoVenda: precoVenda,
       precoCusto: precoCusto,
       disponivel: _disponivel,
+      imagemUrl: urlDigitada.isEmpty ? null : urlDigitada,
     );
 
-    final ok = await context.read<ProdutoViewModel>().adicionarProduto(
-          produto,
-          imagem: _imagemSelecionada,
-        );
+    final ok = await context.read<ProdutoViewModel>().adicionarProduto(produto);
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -223,10 +156,9 @@ class _AbaItem extends StatelessWidget {
   final TextEditingController nomeController;
   final TextEditingController precoVendaController;
   final TextEditingController precoCustoController;
+  final TextEditingController imagemUrlController;
   final bool disponivel;
   final String tipoSelecionado;
-  final File? imagemSelecionada;
-  final VoidCallback onSelecionarImagem;
   final ValueChanged<bool> onDisponivel;
   final ValueChanged<String> onTipo;
 
@@ -234,10 +166,9 @@ class _AbaItem extends StatelessWidget {
     required this.nomeController,
     required this.precoVendaController,
     required this.precoCustoController,
+    required this.imagemUrlController,
     required this.disponivel,
     required this.tipoSelecionado,
-    required this.imagemSelecionada,
-    required this.onSelecionarImagem,
     required this.onDisponivel,
     required this.onTipo,
   });
@@ -247,90 +178,48 @@ class _AbaItem extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // Seletor de tipo
-          Row(children: ['Produto', 'Combo', 'Serviço'].map((tipo) {
-            final selecionado = tipoSelecionado == tipo;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () => onTipo(tipo),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: selecionado
-                        ? const Color(0xFF6C63FF)
-                        : const Color(0xFF1E1E2E),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: selecionado
-                          ? const Color(0xFF6C63FF)
-                          : const Color(0xFF3A3A4E),
-                    ),
-                  ),
-                  child: Text(tipo,
-                      style: TextStyle(
-                          color: selecionado
-                              ? Colors.white
-                              : const Color(0xFF9CA3AF),
-                          fontWeight: selecionado
-                              ? FontWeight.bold
-                              : FontWeight.normal)),
-                ),
-              ),
-            );
-          }).toList()),
-
-          const SizedBox(height: 24),
-
-          // Foto do produto
+          // Preview da foto pela URL
           Center(
-            child: GestureDetector(
-              onTap: onSelecionarImagem,
-              child: Stack(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2E),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: const Color(0xFF6C63FF), width: 2),
-                      image: imagemSelecionada != null
-                          ? DecorationImage(
-                              image: FileImage(imagemSelecionada!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: imagemSelecionada == null
-                        ? const Icon(Icons.image_outlined,
-                            color: Color(0xFF9CA3AF), size: 40)
-                        : null,
+            child: ValueListenableBuilder(
+              valueListenable: imagemUrlController,
+              builder: (_, __, ___) {
+                final url = imagemUrlController.text.trim();
+                return Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFFFF),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: const Color(0xFF3CA4EB), width: 2),
                   ),
-                  Positioned(
-                    bottom: 0, right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF6C63FF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        imagemSelecionada == null
-                            ? Icons.add
-                            : Icons.edit,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  clipBehavior: Clip.antiAlias,
+                  child: url.isEmpty
+                      ? const Icon(Icons.image_outlined,
+                          color: Color(0xFF64748B), size: 40)
+                      : Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (_, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFF3CA4EB)),
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => const Icon(
+                              Icons.broken_image_outlined,
+                              color: Color(0xFFEF4444),
+                              size: 32),
+                        ),
+                );
+              },
             ),
           ),
 
@@ -340,6 +229,20 @@ class _AbaItem extends StatelessWidget {
           _Secao(titulo: 'Informações', children: [
             _Campo(controller: nomeController,
                 label: 'Nome *', icone: Icons.label_outline),
+            const SizedBox(height: 16),
+
+            _Campo(
+              controller: imagemUrlController,
+              label: 'URL da foto do produto',
+              icone: Icons.link,
+              teclado: TextInputType.url,
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Cole o link de uma imagem já hospedada (ex.: Google Drive, '
+              'Imgur, site da fábrica etc.)',
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
+            ),
             const SizedBox(height: 16),
 
             // Preço de venda
@@ -363,7 +266,7 @@ class _AbaItem extends StatelessWidget {
                     return Text(
                       'Markup: 0%   Margem de Lucro: 0% (R\$ ${venda.toStringAsFixed(2)})',
                       style: const TextStyle(
-                          color: Color(0xFF9CA3AF), fontSize: 12),
+                          color: Color(0xFF64748B), fontSize: 12),
                     );
                   },
                 );
@@ -390,11 +293,11 @@ class _AbaItem extends StatelessWidget {
                   children: [
                     Text('Disponível',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF15181F),
                             fontWeight: FontWeight.w600)),
                     Text('Desabilite para deixar indisponível',
                         style: TextStyle(
-                            color: Color(0xFF9CA3AF), fontSize: 12)),
+                            color: Color(0xFF64748B), fontSize: 12)),
                   ],
                 ),
                 Switch(
@@ -431,20 +334,20 @@ class _AbaEstoque extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF).withOpacity(0.1),
+            color: const Color(0xFF3CA4EB).withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-                color: const Color(0xFF6C63FF).withOpacity(0.3)),
+                color: const Color(0xFF3CA4EB).withOpacity(0.3)),
           ),
           child: const Row(children: [
             Icon(Icons.info_outline,
-                color: Color(0xFF6C63FF), size: 18),
+                color: Color(0xFF3CA4EB), size: 18),
             SizedBox(width: 8),
             Expanded(
               child: Text(
                 'O estoque será atualizado automaticamente a cada pedido concluído.',
                 style: TextStyle(
-                    color: Color(0xFF9CA3AF), fontSize: 13),
+                    color: Color(0xFF64748B), fontSize: 13),
               ),
             ),
           ]),
@@ -467,15 +370,22 @@ class _Secao extends StatelessWidget {
       children: [
         Text(titulo,
             style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF15181F),
                 fontSize: 16,
                 fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E2E),
+            color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,20 +417,20 @@ class _Campo extends StatelessWidget {
       controller: controller,
       obscureText: obscuro,
       keyboardType: teclado,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFF15181F)),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-        prefixIcon: Icon(icone, color: const Color(0xFF6C63FF), size: 20),
+        labelStyle: const TextStyle(color: Color(0xFF64748B)),
+        prefixIcon: Icon(icone, color: const Color(0xFF3CA4EB), size: 20),
         filled: true,
-        fillColor: const Color(0xFF2A2A3E),
+        fillColor: const Color(0xFFF0F4F9),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Color(0xFFE1E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF6C63FF)),
+          borderSide: const BorderSide(color: Color(0xFF3CA4EB)),
         ),
       ),
     );

@@ -5,7 +5,6 @@ class Produto {
   final double precoCusto;
   final bool disponivel;
   final String? imagemUrl;
-  final String? imagemPath;
 
   Produto({
     required this.id,
@@ -14,7 +13,6 @@ class Produto {
     required this.precoCusto,
     required this.disponivel,
     this.imagemUrl,
-    this.imagemPath,
   });
 
   factory Produto.fromMap(String id, Map<String, dynamic> map) {
@@ -25,7 +23,6 @@ class Produto {
       precoCusto: (map['precoCusto'] ?? 0).toDouble(),
       disponivel: map['disponivel'] ?? true,
       imagemUrl: map['imagemUrl'] as String?,
-      imagemPath: map['imagemPath'] as String?,
     );
   }
 
@@ -36,7 +33,6 @@ class Produto {
       'precoCusto': precoCusto,
       'disponivel': disponivel,
       'imagemUrl': imagemUrl,
-      'imagemPath': imagemPath,
     };
   }
 
@@ -47,7 +43,6 @@ class Produto {
     double? precoCusto,
     bool? disponivel,
     String? imagemUrl,
-    String? imagemPath,
     bool limparImagem = false,
   }) {
     return Produto(
@@ -57,7 +52,6 @@ class Produto {
       precoCusto: precoCusto ?? this.precoCusto,
       disponivel: disponivel ?? this.disponivel,
       imagemUrl: limparImagem ? null : (imagemUrl ?? this.imagemUrl),
-      imagemPath: limparImagem ? null : (imagemPath ?? this.imagemPath),
     );
   }
 }

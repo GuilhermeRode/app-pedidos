@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../models/produto.dart';
 import '../viewmodels/produto_viewmodel.dart';
@@ -21,60 +19,11 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
   final _precoVendaController = TextEditingController();
   final _precoCustoController = TextEditingController();
   final _estoqueController    = TextEditingController();
+  final _imagemUrlController  = TextEditingController();
 
   late Produto _produtoOriginal;
   bool _disponivel = true;
   bool _iniciado   = false;
-  File? _novaImagem;
-
-  Future<void> _selecionarImagem() async {
-    final picker = ImagePicker();
-    final arquivo = await showModalBottomSheet<XFile?>(
-      context: context,
-      backgroundColor: const Color(0xFF1E1E2E),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined,
-                  color: Color(0xFF6C63FF)),
-              title: const Text('Tirar foto',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () async {
-                final foto = await picker.pickImage(
-                  source: ImageSource.camera,
-                  imageQuality: 80,
-                  maxWidth: 1280,
-                );
-                if (ctx.mounted) Navigator.pop(ctx, foto);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined,
-                  color: Color(0xFF6C63FF)),
-              title: const Text('Escolher da galeria',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () async {
-                final foto = await picker.pickImage(
-                  source: ImageSource.gallery,
-                  imageQuality: 80,
-                  maxWidth: 1280,
-                );
-                if (ctx.mounted) Navigator.pop(ctx, foto);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (arquivo != null) {
-      setState(() => _novaImagem = File(arquivo.path));
-    }
-  }
 
   @override
   void initState() {
@@ -96,6 +45,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
       _precoCustoController.text = _produtoOriginal.precoCusto > 0
           ? _produtoOriginal.precoCusto.toStringAsFixed(2)
           : '';
+      _imagemUrlController.text  = _produtoOriginal.imagemUrl ?? '';
       _disponivel = _produtoOriginal.disponivel;
 
       _iniciado = true;
@@ -109,6 +59,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
     _precoVendaController.dispose();
     _precoCustoController.dispose();
     _estoqueController.dispose();
+    _imagemUrlController.dispose();
     super.dispose();
   }
 
@@ -117,22 +68,22 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
     final vm = context.watch<ProdutoViewModel>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFFF5F8FC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E2E),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF15181F)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Editar Produto',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+                color: Color(0xFF15181F), fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF6C63FF),
-          labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFF9CA3AF),
+          indicatorColor: const Color(0xFF3CA4EB),
+          labelColor: const Color(0xFF3CA4EB),
+          unselectedLabelColor: const Color(0xFF64748B),
           tabs: const [
             Tab(text: 'Item'),
             Tab(text: 'Estoque'),
@@ -148,54 +99,47 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Foto do produto
+                // Preview da foto pela URL
                 Center(
-                  child: GestureDetector(
-                    onTap: _selecionarImagem,
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E1E2E),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: const Color(0xFF6C63FF), width: 2),
-                            image: _novaImagem != null
-                                ? DecorationImage(
-                                    image: FileImage(_novaImagem!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : (_produtoOriginal.imagemUrl != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(
-                                            _produtoOriginal.imagemUrl!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null),
-                          ),
-                          child: (_novaImagem == null &&
-                                  _produtoOriginal.imagemUrl == null)
-                              ? const Icon(Icons.image_outlined,
-                                  color: Color(0xFF9CA3AF), size: 40)
-                              : null,
+                  child: ValueListenableBuilder(
+                    valueListenable: _imagemUrlController,
+                    builder: (_, __, ___) {
+                      final url = _imagemUrlController.text.trim();
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFFFF),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: const Color(0xFF3CA4EB), width: 2),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF6C63FF),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.edit,
-                                color: Colors.white, size: 16),
-                          ),
-                        ),
-                      ],
-                    ),
+                        clipBehavior: Clip.antiAlias,
+                        child: url.isEmpty
+                            ? const Icon(Icons.image_outlined,
+                                color: Color(0xFF64748B), size: 40)
+                            : Image.network(
+                                url,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (_, child, progress) {
+                                  if (progress == null) return child;
+                                  return const Center(
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Color(0xFF3CA4EB)),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.broken_image_outlined,
+                                    color: Color(0xFFEF4444),
+                                    size: 32),
+                              ),
+                      );
+                    },
                   ),
                 ),
 
@@ -206,6 +150,15 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
                       controller: _nomeController,
                       label: 'Nome *',
                       icone: Icons.label_outline),
+                  const SizedBox(height: 16),
+
+                  _Campo(
+                    controller: _imagemUrlController,
+                    label: 'URL da foto do produto',
+                    icone: Icons.link,
+                    teclado: TextInputType.url,
+                    onChanged: (_) => setState(() {}),
+                  ),
                   const SizedBox(height: 16),
 
                   _Campo(
@@ -237,7 +190,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
                       return Text(
                         'Margem: $margem%   Lucro: R\$ ${(venda - custo).toStringAsFixed(2)}',
                         style: const TextStyle(
-                            color: Color(0xFF9CA3AF), fontSize: 12),
+                            color: Color(0xFF64748B), fontSize: 12),
                       );
                     },
                   ),
@@ -264,11 +217,11 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
                         children: [
                           Text('Disponível',
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFF15181F),
                                   fontWeight: FontWeight.w600)),
                           Text('Desabilite para deixar indisponível',
                               style: TextStyle(
-                                  color: Color(0xFF9CA3AF),
+                                  color: Color(0xFF64748B),
                                   fontSize: 12)),
                         ],
                       ),
@@ -299,20 +252,20 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6C63FF).withOpacity(0.1),
+                  color: const Color(0xFF3CA4EB).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: const Color(0xFF6C63FF).withOpacity(0.3)),
+                      color: const Color(0xFF3CA4EB).withOpacity(0.3)),
                 ),
                 child: const Row(children: [
                   Icon(Icons.info_outline,
-                      color: Color(0xFF6C63FF), size: 18),
+                      color: Color(0xFF3CA4EB), size: 18),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'O estoque será atualizado automaticamente a cada pedido concluído.',
                       style: TextStyle(
-                          color: Color(0xFF9CA3AF), fontSize: 13),
+                          color: Color(0xFF64748B), fontSize: 13),
                     ),
                   ),
                 ]),
@@ -348,14 +301,13 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed:
-                    (vm.carregando || vm.enviandoImagem) ? null : _salvar,
+                onPressed: vm.carregando ? null : _salvar,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
+                  backgroundColor: const Color(0xFF3CA4EB),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                icon: (vm.carregando || vm.enviandoImagem)
+                icon: vm.carregando
                     ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -363,9 +315,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
                         color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.check, color: Colors.white),
                 label: Text(
-                  vm.enviandoImagem
-                      ? 'Enviando foto...'
-                      : (vm.carregando ? 'Salvando...' : 'Salvar Alterações'),
+                  vm.carregando ? 'Salvando...' : 'Salvar Alterações',
                   style: const TextStyle(
                       fontSize: 16, color: Colors.white),
                 ),
@@ -392,16 +342,20 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
         _precoCustoController.text.replaceAll(',', '.')) ??
         0;
 
+    final urlDigitada = _imagemUrlController.text.trim();
+
     final produtoAtualizado = _produtoOriginal.copyWith(
       nome: _nomeController.text.trim(),
       precoVenda: precoVenda,
       precoCusto: precoCusto,
       disponivel: _disponivel,
+      imagemUrl: urlDigitada.isEmpty ? null : urlDigitada,
+      limparImagem: urlDigitada.isEmpty,
     );
 
     final ok = await context
         .read<ProdutoViewModel>()
-        .atualizarProduto(produtoAtualizado, novaImagem: _novaImagem);
+        .atualizarProduto(produtoAtualizado);
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -429,15 +383,22 @@ class _Secao extends StatelessWidget {
       children: [
         Text(titulo,
             style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF15181F),
                 fontSize: 16,
                 fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E2E),
+            color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,22 +433,22 @@ class _Campo extends StatelessWidget {
       obscureText: obscuro,
       keyboardType: teclado,
       onChanged: onChanged,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFF15181F)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-        const TextStyle(color: Color(0xFF9CA3AF)),
+        const TextStyle(color: Color(0xFF64748B)),
         prefixIcon:
-        Icon(icone, color: const Color(0xFF6C63FF), size: 20),
+        Icon(icone, color: const Color(0xFF3CA4EB), size: 20),
         filled: true,
-        fillColor: const Color(0xFF2A2A3E),
+        fillColor: const Color(0xFFF0F4F9),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Color(0xFFE1E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF6C63FF)),
+          borderSide: const BorderSide(color: Color(0xFF3CA4EB)),
         ),
       ),
     );
