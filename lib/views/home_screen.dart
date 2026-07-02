@@ -227,12 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () =>
                         Navigator.pushNamed(context, '/adicionar-produto'),
                   ),
-                  _CardAtalho(
-                    label: 'Pedidos',
-                    icone: Icons.receipt_long_outlined,
-                    cor: const Color(0xFFF59E0B),
-                    onTap: () {},
-                  ),
                 ],
               ),
 
