@@ -21,17 +21,17 @@ class DetalhesProdutoScreen extends StatelessWidget {
     final lucro = produto.precoVenda - produto.precoCusto;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFFF5F8FC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E2E),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF15181F)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Detalhes do Produto',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+                color: Color(0xFF15181F), fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -60,14 +60,37 @@ class DetalhesProdutoScreen extends StatelessWidget {
                           const Color(0xFF3B82F6).withOpacity(0.4),
                           width: 2),
                     ),
-                    child: const Icon(Icons.inventory_2_outlined,
-                        color: Color(0xFF3B82F6), size: 36),
+                    clipBehavior: Clip.antiAlias,
+                    child: (produto.imagemUrl == null ||
+                            produto.imagemUrl!.isEmpty)
+                        ? const Icon(Icons.inventory_2_outlined,
+                            color: Color(0xFF3B82F6), size: 36)
+                        : Image.network(
+                            produto.imagemUrl!,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (_, child, progress) {
+                              if (progress == null) return child;
+                              return const Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF3CA4EB)),
+                                ),
+                              );
+                            },
+                            errorBuilder: (_, __, ___) => const Icon(
+                                Icons.broken_image_outlined,
+                                color: Color(0xFF3B82F6),
+                                size: 32),
+                          ),
                   ),
                   const SizedBox(height: 12),
                   Text(produto.nome,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF15181F),
                           fontSize: 20,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
@@ -113,21 +136,21 @@ class DetalhesProdutoScreen extends StatelessWidget {
                     label: 'Preço de Custo',
                     valor:
                     'R\$ ${produto.precoCusto.toStringAsFixed(2)}',
-                    cor: const Color(0xFF9CA3AF),
+                    cor: const Color(0xFF64748B),
                     icone: Icons.money_off,
                   ),
                 ),
               ]),
               if (temMargem) ...[
                 const SizedBox(height: 16),
-                const Divider(color: Color(0xFF2A2A3E)),
+                const Divider(color: Color(0xFFF0F4F9)),
                 const SizedBox(height: 16),
                 Row(children: [
                   Expanded(
                     child: _CardPreco(
                       label: 'Lucro por Unid.',
                       valor: 'R\$ ${lucro.toStringAsFixed(2)}',
-                      cor: const Color(0xFF6C63FF),
+                      cor: const Color(0xFF3CA4EB),
                       icone: Icons.trending_up,
                     ),
                   ),
@@ -157,7 +180,7 @@ class DetalhesProdutoScreen extends StatelessWidget {
                   arguments: produto,
                 ).then((_) => Navigator.pop(context)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
+                  backgroundColor: const Color(0xFF3CA4EB),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -181,19 +204,19 @@ class DetalhesProdutoScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E2E),
+        backgroundColor: const Color(0xFFFFFFFF),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16)),
         title: const Text('Excluir produto',
-            style: TextStyle(color: Colors.white)),
+            style: TextStyle(color: Color(0xFF15181F))),
         content: Text(
             'Deseja excluir "${produto.nome}"? Esta ação não pode ser desfeita.',
-            style: const TextStyle(color: Color(0xFF9CA3AF))),
+            style: const TextStyle(color: Color(0xFF64748B))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF9CA3AF))),
+                style: TextStyle(color: Color(0xFF64748B))),
           ),
           TextButton(
             onPressed: () {
@@ -226,7 +249,7 @@ class _Secao extends StatelessWidget {
       children: [
         Text(titulo,
             style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF15181F),
                 fontSize: 16,
                 fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
@@ -234,8 +257,15 @@ class _Secao extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E2E),
+            color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,7 +304,7 @@ class _CardPreco extends StatelessWidget {
           const SizedBox(height: 8),
           Text(label,
               style: const TextStyle(
-                  color: Color(0xFF9CA3AF), fontSize: 11)),
+                  color: Color(0xFF64748B), fontSize: 11)),
           const SizedBox(height: 4),
           Text(valor,
               style: TextStyle(

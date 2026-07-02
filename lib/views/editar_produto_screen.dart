@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/produto.dart';
 import '../viewmodels/produto_viewmodel.dart';
+import '../utils/imagem_url_utils.dart';
 
 class EditarProdutoScreen extends StatefulWidget {
   const EditarProdutoScreen({super.key});
@@ -29,6 +30,20 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _imagemUrlController.addListener(_normalizarUrlColada);
+  }
+
+  /// Se o texto colado for um link de compartilhamento do Google Drive,
+  /// substitui automaticamente pelo link direto da imagem.
+  void _normalizarUrlColada() {
+    final atual = _imagemUrlController.text;
+    final normalizada = normalizarUrlImagem(atual);
+    if (normalizada != atual) {
+      _imagemUrlController.value = TextEditingValue(
+        text: normalizada,
+        selection: TextSelection.collapsed(offset: normalizada.length),
+      );
+    }
   }
 
   @override
@@ -59,6 +74,7 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
     _precoVendaController.dispose();
     _precoCustoController.dispose();
     _estoqueController.dispose();
+    _imagemUrlController.removeListener(_normalizarUrlColada);
     _imagemUrlController.dispose();
     super.dispose();
   }
@@ -158,6 +174,11 @@ class _EditarProdutoScreenState extends State<EditarProdutoScreen>
                     icone: Icons.link,
                     teclado: TextInputType.url,
                     onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Links do Google Drive são convertidos automaticamente.',
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
                   ),
                   const SizedBox(height: 16),
 

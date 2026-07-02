@@ -34,14 +34,14 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFFF5F8FC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E2E),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         automaticallyImplyLeading: false,
         title: const Text('Produtos',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+                color: Color(0xFF15181F), fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
@@ -50,18 +50,18 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
               controller: _buscaController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Color(0xFF15181F)),
               onChanged: (v) => setState(() => _busca = v),
               decoration: InputDecoration(
                 hintText: 'Buscar produto...',
                 hintStyle:
-                const TextStyle(color: Color(0xFF9CA3AF)),
+                const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon:
-                const Icon(Icons.search, color: Color(0xFF6C63FF)),
+                const Icon(Icons.search, color: Color(0xFF3CA4EB)),
                 suffixIcon: _busca.isNotEmpty
                     ? IconButton(
                   icon: const Icon(Icons.clear,
-                      color: Color(0xFF9CA3AF), size: 18),
+                      color: Color(0xFF64748B), size: 18),
                   onPressed: () {
                     _buscaController.clear();
                     setState(() => _busca = '');
@@ -69,15 +69,15 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
                 )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF1E1E2E),
+                fillColor: const Color(0xFFFFFFFF),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE1E8F0)),
+        ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide:
-                  const BorderSide(color: Color(0xFF6C63FF)),
+                  const BorderSide(color: Color(0xFF3CA4EB)),
                 ),
               ),
             ),
@@ -122,7 +122,7 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
               children: [
                 Text('${produtosFiltrados.length} produto(s)',
                     style: const TextStyle(
-                        color: Color(0xFF9CA3AF), fontSize: 13)),
+                        color: Color(0xFF64748B), fontSize: 13)),
               ],
             ),
           ),
@@ -133,7 +133,7 @@ class _ListaProdutosScreenState extends State<ListaProdutosScreen> {
             child: vm.carregando
                 ? const Center(
                 child: CircularProgressIndicator(
-                    color: Color(0xFF6C63FF)))
+                    color: Color(0xFF3CA4EB)))
                 : produtosFiltrados.isEmpty
                 ? _Vazio(
               mensagem: _busca.isNotEmpty
@@ -189,12 +189,19 @@ class _ProdutoCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E2E),
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            // Ícone
+            // Foto (ou ícone padrão se não houver)
             Container(
               width: 44,
               height: 44,
@@ -204,8 +211,19 @@ class _ProdutoCard extends StatelessWidget {
                 border: Border.all(
                     color: const Color(0xFF3B82F6).withOpacity(0.4)),
               ),
-              child: const Icon(Icons.inventory_2_outlined,
-                  color: Color(0xFF3B82F6), size: 20),
+              clipBehavior: Clip.antiAlias,
+              child: (produto.imagemUrl == null ||
+                      produto.imagemUrl!.isEmpty)
+                  ? const Icon(Icons.inventory_2_outlined,
+                      color: Color(0xFF3B82F6), size: 20)
+                  : Image.network(
+                      produto.imagemUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                          Icons.inventory_2_outlined,
+                          color: Color(0xFF3B82F6),
+                          size: 20),
+                    ),
             ),
             const SizedBox(width: 12),
 
@@ -218,7 +236,7 @@ class _ProdutoCard extends StatelessWidget {
                     Expanded(
                       child: Text(produto.nome,
                           style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF15181F),
                               fontWeight: FontWeight.w600,
                               fontSize: 15)),
                     ),
@@ -257,7 +275,7 @@ class _ProdutoCard extends StatelessWidget {
                         label: 'Custo',
                         valor:
                         'R\$ ${produto.precoCusto.toStringAsFixed(2)}',
-                        cor: const Color(0xFF9CA3AF)),
+                        cor: const Color(0xFF64748B)),
                     if (margem != null) ...[
                       const SizedBox(width: 16),
                       _InfoPreco(
@@ -272,7 +290,7 @@ class _ProdutoCard extends StatelessWidget {
 
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right,
-                color: Color(0xFF9CA3AF), size: 20),
+                color: Color(0xFF64748B), size: 20),
           ],
         ),
       ),
@@ -295,7 +313,7 @@ class _InfoPreco extends StatelessWidget {
       children: [
         Text(label,
             style: const TextStyle(
-                color: Color(0xFF9CA3AF), fontSize: 10)),
+                color: Color(0xFF64748B), fontSize: 10)),
         Text(valor,
             style: TextStyle(
                 color: cor,
@@ -315,7 +333,7 @@ class _FiltroChip extends StatelessWidget {
   const _FiltroChip({
     required this.label,
     required this.selecionado,
-    this.cor = const Color(0xFF6C63FF),
+    this.cor = const Color(0xFF3CA4EB),
     required this.onTap,
   });
 
@@ -329,14 +347,14 @@ class _FiltroChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selecionado
               ? cor.withOpacity(0.15)
-              : const Color(0xFF1E1E2E),
+              : const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: selecionado ? cor : const Color(0xFF3A3A4E)),
+              color: selecionado ? cor : const Color(0xFFE1E8F0)),
         ),
         child: Text(label,
             style: TextStyle(
-                color: selecionado ? cor : const Color(0xFF9CA3AF),
+                color: selecionado ? cor : const Color(0xFF64748B),
                 fontSize: 13,
                 fontWeight: selecionado
                     ? FontWeight.w600
@@ -357,12 +375,12 @@ class _Vazio extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.inventory_2_outlined,
-              color: Color(0xFF3A3A4E), size: 64),
+              color: Color(0xFFE1E8F0), size: 64),
           const SizedBox(height: 16),
           Text(mensagem,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: Color(0xFF9CA3AF), fontSize: 14)),
+                  color: Color(0xFF64748B), fontSize: 14)),
         ],
       ),
     );
