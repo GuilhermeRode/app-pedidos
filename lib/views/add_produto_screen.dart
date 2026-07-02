@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../models/pedido.dart';
 import '../models/cliente.dart';
@@ -26,11 +28,71 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
 
   bool _disponivel = true;
   String _tipoSelecionado = 'Produto'; // Produto, Combo, Serviço
+  File? _imagemSelecionada;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  Future<void> _selecionarImagem() async {
+    final picker = ImagePicker();
+    final arquivo = await showModalBottomSheet<XFile?>(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined,
+                  color: Color(0xFF6C63FF)),
+              title: const Text('Tirar foto',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () async {
+                final foto = await picker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 80,
+                  maxWidth: 1280,
+                );
+                if (ctx.mounted) Navigator.pop(ctx, foto);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined,
+                  color: Color(0xFF6C63FF)),
+              title: const Text('Escolher da galeria',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () async {
+                final foto = await picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 80,
+                  maxWidth: 1280,
+                );
+                if (ctx.mounted) Navigator.pop(ctx, foto);
+              },
+            ),
+            if (_imagemSelecionada != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text('Remover foto',
+                    style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  setState(() => _imagemSelecionada = null);
+                  Navigator.pop(ctx);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (arquivo != null) {
+      setState(() => _imagemSelecionada = File(arquivo.path));
+    }
   }
 
   @override
@@ -80,6 +142,8 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
             precoCustoController: _precoCustoController,
             disponivel: _disponivel,
             tipoSelecionado: _tipoSelecionado,
+            imagemSelecionada: _imagemSelecionada,
+            onSelecionarImagem: _selecionarImagem,
             onDisponivel: (v) => setState(() => _disponivel = v),
             onTipo: (t) => setState(() => _tipoSelecionado = t),
           ),
@@ -93,20 +157,22 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
         child: SizedBox(
           height: 52,
           child: ElevatedButton.icon(
-            onPressed: vm.carregando ? null : _salvar,
+            onPressed: (vm.carregando || vm.enviandoImagem) ? null : _salvar,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF6C63FF),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            icon: vm.carregando
+            icon: (vm.carregando || vm.enviandoImagem)
                 ? const SizedBox(
                 width: 20, height: 20,
                 child: CircularProgressIndicator(
                     color: Colors.white, strokeWidth: 2))
                 : const Icon(Icons.check, color: Colors.white),
             label: Text(
-              vm.carregando ? 'Salvando...' : 'Salvar',
+              vm.enviandoImagem
+                  ? 'Enviando foto...'
+                  : (vm.carregando ? 'Salvando...' : 'Salvar'),
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
@@ -136,7 +202,10 @@ class _AdicionarProdutoScreenState extends State<AdicionarProdutoScreen>
       disponivel: _disponivel,
     );
 
-    final ok = await context.read<ProdutoViewModel>().adicionarProduto(produto);
+    final ok = await context.read<ProdutoViewModel>().adicionarProduto(
+          produto,
+          imagem: _imagemSelecionada,
+        );
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -156,6 +225,8 @@ class _AbaItem extends StatelessWidget {
   final TextEditingController precoCustoController;
   final bool disponivel;
   final String tipoSelecionado;
+  final File? imagemSelecionada;
+  final VoidCallback onSelecionarImagem;
   final ValueChanged<bool> onDisponivel;
   final ValueChanged<String> onTipo;
 
@@ -165,6 +236,8 @@ class _AbaItem extends StatelessWidget {
     required this.precoCustoController,
     required this.disponivel,
     required this.tipoSelecionado,
+    required this.imagemSelecionada,
+    required this.onSelecionarImagem,
     required this.onDisponivel,
     required this.onTipo,
   });
@@ -213,35 +286,51 @@ class _AbaItem extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Imagem placeholder
+          // Foto do produto
           Center(
-            child: Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: const Color(0xFF6C63FF), width: 2),
-                  ),
-                  child: const Icon(Icons.image_outlined,
-                      color: Color(0xFF9CA3AF), size: 40),
-                ),
-                Positioned(
-                  bottom: 0, right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF6C63FF),
+            child: GestureDetector(
+              onTap: onSelecionarImagem,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E2E),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                          color: const Color(0xFF6C63FF), width: 2),
+                      image: imagemSelecionada != null
+                          ? DecorationImage(
+                              image: FileImage(imagemSelecionada!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: const Icon(Icons.add,
-                        color: Colors.white, size: 16),
+                    child: imagemSelecionada == null
+                        ? const Icon(Icons.image_outlined,
+                            color: Color(0xFF9CA3AF), size: 40)
+                        : null,
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 0, right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF6C63FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        imagemSelecionada == null
+                            ? Icons.add
+                            : Icons.edit,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
